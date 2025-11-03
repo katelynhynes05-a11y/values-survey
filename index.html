@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<title>Values Survey — Equality, Innovation, Ethics</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+}
+.container {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  width: 45%;
+  min-width: 350px;
+}
+.slider-block {
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Values Survey</h2>
+<p>Values: A = Equality, B = Innovation, C = Ethics</p>
+
+<div class="container">
+  
+<div class="card">
+<h3>Present (Today)</h3>
+<div id="todayPlot" style="height:400px;"></div>
+
+<div class="slider-block">
+A (Equality): <span id="A_today">34</span><br>
+<input type="range" id="A_today_slider" min="0" max="100" value="34">
+</div>
+
+<div class="slider-block">
+B (Innovation): <span id="B_today">33</span><br>
+<input type="range" id="B_today_slider" min="0" max="100" value="33">
+</div>
+
+<div class="slider-block">
+C (Ethics): <span id="C_today">33</span><br>
+<input type="range" id="C_today_slider" min="0" max="100" value="33">
+</div>
+
+<p>Sliders auto-normalize to sum = 100.</p>
+</div>
+
+
+<div class="card">
+<h3>Year 2075</h3>
+<div id="futurePlot" style="height:400px;"></div>
+
+<div class="slider-block">
+A (Equality): <span id="A_future">34</span><br>
+<input type="range" id="A_future_slider" min="0" max="100" value="34">
+</div>
+
+<div class="slider-block">
+B (Innovation): <span id="B_future">33</span><br>
+<input type="range" id="B_future_slider" min="0" max="100" value="33">
+</div>
+
+<div class="slider-block">
+C (Ethics): <span id="C_future">33</span><br>
+<input type="range" id="C_future_slider" min="0" max="100" value="33">
+</div>
+
+<p>Sliders auto-normalize to sum = 100.</p>
+</div>
+
+</div>
+
+<button onclick="alert('Submit logic goes here (Google Form / Airtable / Firebase)')">
+Submit my responses
+</button>
+
+
+<script>
+// -------- Plot function --------
+function renderPlot(div, A, B, C, title) {
+  Plotly.newPlot(div, [{
+    type: 'scatterternary',
+    mode: 'markers',
+    a: [A], b: [B], c: [C],
+    marker: { size: 12, symbol: 'circle' }
+  }], {
+    ternary: {
+      sum: 100,
+      aaxis: { title: "Equality" },
+      baxis: { title: "Innovation" },
+      caxis: { title: "Ethics" }
+    },
+    margin: { t: 30 },
+    title
+  });
+}
+
+// -------- Normalize sliders to sum = 100 --------
+function normalize(idA, idB, idC, idPlot, labelA, labelB, labelC, title) {
+  let A = +document.getElementById(idA).value;
+  let B = +document.getElementById(idB).value;
+  let C = +document.getElementById(idC).value;
+  let total = A + B + C;
+
+  A = Math.round(A / total * 100);
+  B = Math.round(B / total * 100);
+  C = 100 - A - B;
+
+  document.getElementById(idA).value = A;
+  document.getElementById(idB).value = B;
+  document.getElementById(idC).value = C;
+
+  document.getElementById(labelA).textContent = A;
+  document.getElementById(labelB).textContent = B;
+  document.getElementById(labelC).textContent = C;
+
+  renderPlot(idPlot, A, B, C, title);
+}
+
+// ---- Hook up sliders ----
+["today", "future"].forEach(period => {
+  ["A","B","C"].forEach(axis => {
+    document.getElementById(`${axis}_${period}_slider`).oninput = () =>
+      normalize(
+        `A_${period}_slider`, `B_${period}_slider`, `C_${period}_slider`,
+        `${period}Plot`, `A_${period}`, `B_${period}`, `C_${period}`,
+        period === "today" ? "Today" : "2075"
+      );
+  });
+});
+
+// initial draw
+normalize("A_today_slider","B_today_slider","C_today_slider","todayPlot","A_today","B_today","C_today","Today");
+normalize("A_future_slider","B_future_slider","C_future_slider","futurePlot","A_future","B_future","C_future","2075");
+</script>
+
+</body>
+</html>
